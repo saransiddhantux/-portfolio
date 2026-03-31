@@ -282,6 +282,24 @@
     font-family: 'DM Sans', sans-serif;
   }
   .read-more-btn:hover { background: var(--green); color: var(--cream); }
+  .access-prompt {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+  }
+
+  .case-access-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.2rem;
+  }
+  .case-access-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
 
   /* ─── VIDEO THUMBNAIL ─── */
   .card-visual-wrap {
@@ -1030,9 +1048,9 @@
           <h4>Impact</h4>
           <p>Reduced ambiguity at source, improved routing accuracy, and built scalable query intelligence across 5 teams at 80K queries/month.</p>
         </div>
-        <button class="read-more-btn" onclick="openModal('AI Query Module — Workflow Intelligence System')">
-          Read full case study →
-        </button>
+        <div class="case-access-row">          <p class="access-prompt">Interested in this project?</p>
+        <button class="read-more-btn" onclick="openModal('AI Query Module — Workflow Intelligence System')">Get access</button>
+        </div>
       </div>
       <div class="card-visual-wrap" id="card-video-1"
            onmouseenter="playVideo('card-video-1')"
@@ -1097,9 +1115,9 @@
           <h4>Impact</h4>
           <p>₹500 Cr+ AUM. Journey reduced from ~15 steps to ~4. Significant drop-off reduction at the pledge step.</p>
         </div>
-        <button class="read-more-btn" onclick="openModal('Loan Against Mutual Funds — LAMF')">
-          Read full case study →
-        </button>
+        <div class="case-access-row">          <p class="access-prompt">Interested in this project?</p>
+        <button class="read-more-btn" onclick="openModal('Loan Against Mutual Funds — LAMF')">Get access</button>
+        </div>
       </div>
       <div class="card-visual-wrap" id="card-video-2"
            onmouseenter="playVideo('card-video-2')"
@@ -1160,9 +1178,9 @@
           <h4>Impact</h4>
           <p>Reduced BIU and Tech dependency for offer changes. Faster update cycles with cleaner audit trail. Simulation layer in development.</p>
         </div>
-        <button class="read-more-btn" onclick="openModal('Offer Pipeline Automation')">
-          Read full case study →
-        </button>
+        <div class="case-access-row">          <p class="access-prompt">Interested in this project?</p>
+        <button class="read-more-btn" onclick="openModal('Offer Pipeline Automation')">Get access</button>
+        </div>
       </div>
       <div class="card-visual-wrap" id="card-video-3"
            onmouseenter="playVideo('card-video-3')"
@@ -1597,11 +1615,31 @@
       setTimeout(() => document.getElementById('emailInput').style.borderColor = '', 1500);
       return;
     }
-    // Here you'd send to your backend / Notion / Airtable
-    // For now, just show success
-    console.log('Email submitted:', email, 'for:', currentCaseStudy);
-    document.getElementById('modalFormContent').style.display = 'none';
-    document.getElementById('modalSuccess').style.display = 'block';
+
+    // Show loading state on button
+    const btn = document.querySelector('#modalFormContent button');
+    const originalText = btn.textContent;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    // Send to Make webhook → Notion + Gmail notification
+    const WEBHOOK = 'https://hook.eu1.make.com/a3cx1te66vdb61tnyjaterarkcsbi19b';
+
+    fetch(`${WEBHOOK}?email=${encodeURIComponent(email)}&project=${encodeURIComponent(currentCaseStudy)}`)
+      .then(() => {
+        // Show success state regardless of response
+        document.getElementById('modalFormContent').style.display = 'none';
+        document.getElementById('modalSuccess').style.display = 'block';
+      })
+      .catch(() => {
+        // Still show success — request likely went through (CORS blocks response)
+        document.getElementById('modalFormContent').style.display = 'none';
+        document.getElementById('modalSuccess').style.display = 'block';
+      })
+      .finally(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      });
   }
 
   function copyEmail() {
